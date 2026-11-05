@@ -2,19 +2,19 @@ const { DatabaseSync } = require('node:sqlite');
 
 const db = new DatabaseSync(process.env.DB_FILE || 'meet.db');
 db.exec(`
-  PRAGMA journal_mode = WAL;
-  PRAGMA foreign_keys = ON;
+  pragma journal_mode = wal;
+  pragma foreign_keys = on;
 
-  CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY,
-    username TEXT UNIQUE NOT NULL COLLATE NOCASE,
-    password_hash TEXT NOT NULL,
-    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  create table if not exists users (
+    id integer primary key,
+    username text unique not null collate nocase,
+    password_hash text not null,
+    created_at text not null default current_timestamp
   );
-  CREATE TABLE IF NOT EXISTS sessions (
-    token TEXT PRIMARY KEY,
-    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    expires_at INTEGER NOT NULL
+  create table if not exists sessions (
+    token text primary key,
+    user_id integer not null references users(id) on delete cascade,
+    expires_at integer not null
   );
 `);
 

@@ -1,4 +1,4 @@
-// Shared helpers + login and lobby pages
+// helpers used on every page + login and lobby page code
 
 async function api(method, url, body) {
   const res = await fetch(url, {
@@ -12,14 +12,14 @@ async function api(method, url, body) {
   return data;
 }
 
-// Remember where to come back after login. Kept in sessionStorage, not the URL,
-// so the encryption key in the invite link's #fragment never reaches the server.
+// save where to go back after login in sessionStorage instead of the url,
+// that way the chat key after # never gets sent to the server
 function goLogin() {
   try { sessionStorage.setItem('next', location.pathname + location.search + location.hash); } catch {}
   location.href = '/login';
 }
 
-// h('div', {class: 'x', onclick: fn}, 'text', child) -> element. Strings become text nodes (no XSS).
+// small helper to build elements. strings go in as text so nobody can inject html
 function h(tag, attrs = {}, ...children) {
   const el = document.createElement(tag);
   for (const [k, v] of Object.entries(attrs)) {
@@ -36,7 +36,7 @@ function toast(msg) {
   setTimeout(() => t.remove(), 3500);
 }
 
-// base64url <-> bytes
+// base64url encode / decode
 const b64 = buf => btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 const unb64 = s => Uint8Array.from(atob(s.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0));
 
@@ -69,7 +69,7 @@ async function lobbyPage() {
 
   document.getElementById('new').onclick = () => {
     const id = crypto.randomUUID().slice(0, 8) + '-' + crypto.randomUUID().slice(0, 4);
-    const key = b64(crypto.getRandomValues(new Uint8Array(32))); // AES-256 key for chat
+    const key = b64(crypto.getRandomValues(new Uint8Array(32))); // random 256 bit key for the chat
     location.href = `/room?id=${id}#k=${key}`;
   };
 

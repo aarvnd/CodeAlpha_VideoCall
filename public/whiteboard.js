@@ -1,21 +1,21 @@
-// Shared whiteboard. Points are sent as 0..1 fractions of the board,
-// so a stroke lands in the same place on every screen size.
+// points are sent as 0-1 values instead of pixels,
+// so the drawing shows up in the same spot on any screen size
 function initBoard(canvas, socket, history) {
   const ctx = canvas.getContext('2d');
-  const W = canvas.width, H = canvas.height;
-  const BG = '#fbfbfd';
+  const width = canvas.width, height = canvas.height;
+  const bg = '#fbfbfd';
   const color = document.getElementById('pen-color');
   const size = document.getElementById('pen-size');
   let erasing = false, last = null;
 
-  const clear = () => { ctx.fillStyle = BG; ctx.fillRect(0, 0, W, H); };
+  const clear = () => { ctx.fillStyle = bg; ctx.fillRect(0, 0, width, height); };
   function line(s) {
     ctx.strokeStyle = s.c;
     ctx.lineWidth = s.w;
     ctx.lineCap = 'round';
     ctx.beginPath();
-    ctx.moveTo(s.x0 * W, s.y0 * H);
-    ctx.lineTo(s.x1 * W, s.y1 * H);
+    ctx.moveTo(s.x0 * width, s.y0 * height);
+    ctx.lineTo(s.x1 * width, s.y1 * height);
     ctx.stroke();
   }
   const pos = e => {
@@ -31,7 +31,7 @@ function initBoard(canvas, socket, history) {
   canvas.onpointermove = e => {
     if (!last) return;
     const p = pos(e);
-    const s = { x0: last.x, y0: last.y, x1: p.x, y1: p.y, c: erasing ? BG : color.value, w: erasing ? 30 : Number(size.value) };
+    const s = { x0: last.x, y0: last.y, x1: p.x, y1: p.y, c: erasing ? bg : color.value, w: erasing ? 30 : Number(size.value) };
     line(s);
     socket.emit('draw', s);
     last = p;

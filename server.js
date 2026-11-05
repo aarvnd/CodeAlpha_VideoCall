@@ -7,26 +7,26 @@ const { hashPassword, verifyPassword, createSession, loadUser, requireAuth, dest
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server, { maxHttpBufferSize: 1e5 }); // signaling messages are small
+const io = new Server(server, { maxHttpBufferSize: 1e5 }); // only small signaling msgs go through here
 
 app.use(express.json({ limit: '10kb' }));
 app.use(loadUser);
 app.use(express.static(path.join(__dirname, 'public'), { extensions: ['html'] }));
 
-const USERNAME_RE = /^[a-zA-Z0-9_]{3,20}$/;
-const ROOM_RE = /^[a-z0-9-]{4,40}$/;
-const MAX_PEERS = 6; // mesh: every user sends video to every other user, so keep rooms small
-const MAX_STROKES = 20000;
+const usernameRe = /^[a-zA-Z0-9_]{3,20}$/;
+const roomRe = /^[a-z0-9-]{4,40}$/;
+const maxPeers = 6; // mesh call, everyone sends video to everyone so keep it small
+const maxStrokes = 20000;
 const bad = (res, msg, code = 400) => res.status(code).json({ error: msg });
 
-// ---------- Auth (REST) ----------
+// auth
 app.post('/api/register', (req, res) => {
   const { username, password } = req.body || {};
-  if (!USERNAME_RE.test(username || '')) return bad(res, 'Username must be 3-20 letters, numbers or _');
+  if (!usernameRe.test(username || '')) return bad(res, 'Username must be 3-20 letters, numbers or _');
   if (typeof password !== 'string' || password.length < 6 || password.length > 100)
     return bad(res, 'Password must be 6-100 characters');
-  if (db.prepare('SELECT 1 FROM users WHERE username = ?').get(username)) return bad(res, 'Username is taken', 409);
-  const { lastInsertRowid } = db.prepare('INSERT INTO users (username, password_hash) VALUES (?, ?)')
+  if (db.prepare('select 1 from users where username = ?').get(username)) return bad(res, 'Username is taken', 409);
+  const { lastInsertRowid } = db.prepare('insert into users (username, password_hash) values (?, ?)')
     .run(username, hashPassword(password));
   createSession(res, lastInsertRowid);
   res.status(201).json({ id: Number(lastInsertRowid), username });
@@ -34,7 +34,7 @@ app.post('/api/register', (req, res) => {
 
 app.post('/api/login', (req, res) => {
   const { username, password } = req.body || {};
-  const user = typeof username === 'string' && db.prepare('SELECT * FROM users WHERE username = ?').get(username);
+  const user = typeof username === 'string' && db.prepare('select * from users where username = ?').get(username);
   if (!user || typeof password !== 'string' || !verifyPassword(password, user.password_hash))
     return bad(res, 'Wrong username or password', 401);
   createSession(res, user.id);
@@ -44,11 +44,11 @@ app.post('/api/login', (req, res) => {
 app.post('/api/logout', (req, res) => { destroySession(req, res); res.json({ ok: true }); });
 app.get('/api/me', requireAuth, (req, res) => res.json(req.user));
 
-// ---------- Real-time (socket.io) ----------
-// rooms: roomId -> { peers: Map(socketId -> username), strokes: [] }
+// socket.io stuff
+// roomId -> { peers: Map(socketId -> username), strokes: [] }
 const rooms = new Map();
 
-// Same session cookie as the REST API: no valid login, no socket
+// check the same login cookie here, not logged in = no socket
 io.use((socket, next) => {
   loadUser(socket.request, null, () => {});
   if (!socket.request.user) return next(new Error('unauthorized'));
@@ -65,21 +65,22 @@ io.on('connection', socket => {
   const room = () => rooms.get(roomId);
 
   socket.on('join', (id, ack) => {
-    if (roomId || typeof id !== 'string' || !ROOM_RE.test(id)) return ack?.({ error: 'Invalid room' });
+    if (roomId || typeof id !== 'string' || !roomRe.test(id)) return ack?.({ error: 'Invalid room' });
     if (!rooms.has(id)) rooms.set(id, { peers: new Map(), strokes: [] });
     const r = rooms.get(id);
-    if (r.peers.size >= MAX_PEERS) return ack?.({ error: `Room is full (max ${MAX_PEERS})` });
+    if (r.peers.size >= maxPeers) return ack?.({ error: `Room is full (max ${maxPeers})` });
 
     roomId = id;
     const existing = [...r.peers].map(([peerId, username]) => ({ id: peerId, username }));
     r.peers.set(socket.id, socket.user.username);
     socket.join(id);
-    // The newcomer calls everyone already inside; they just wait for its offer (avoids both sides offering)
+    // new person sends offers to everyone already in the room, others just answer.
+    // if both sides sent offers at the same time it gets messy
     ack?.({ self: socket.id, username: socket.user.username, peers: existing, strokes: r.strokes });
     socket.to(id).emit('peer-joined', { id: socket.id, username: socket.user.username });
   });
 
-  // WebRTC offer / answer / ICE candidate: relayed only to a peer in the same room
+  // pass offer/answer/ice candidates along, only to someone in the same room
   socket.on('signal', ({ to, data } = {}) => {
     if (room()?.peers.has(to)) io.to(to).emit('signal', { from: socket.id, data });
   });
@@ -87,7 +88,7 @@ io.on('connection', socket => {
   socket.on('draw', stroke => {
     const r = room();
     if (!r || !validStroke(stroke)) return;
-    if (r.strokes.length < MAX_STROKES) r.strokes.push(stroke);
+    if (r.strokes.length < maxStrokes) r.strokes.push(stroke);
     socket.to(roomId).emit('draw', stroke);
   });
 
@@ -98,8 +99,8 @@ io.on('connection', socket => {
     io.to(roomId).emit('clear-board', socket.user.username);
   });
 
-  // Chat is end-to-end encrypted in the browser (AES-GCM). The server only sees {iv, ct}
-  // and cannot read it: the key lives in the invite link's #fragment, which browsers never send.
+  // chat is encrypted in the browser (aes-gcm), server just forwards {iv, ct}.
+  // it can't read it because the key is after the # in the invite link and browsers don't send that part
   socket.on('chat', msg => {
     const b64 = (v, max) => typeof v === 'string' && v.length <= max && /^[A-Za-z0-9_-]+$/.test(v);
     if (!room() || !b64(msg?.iv, 32) || !b64(msg?.ct, 3000)) return;
@@ -111,7 +112,7 @@ io.on('connection', socket => {
     if (!r) return;
     r.peers.delete(socket.id);
     socket.to(roomId).emit('peer-left', socket.id);
-    if (!r.peers.size) rooms.delete(roomId); // empty room: forget its whiteboard too
+    if (!r.peers.size) rooms.delete(roomId); // last one left, delete the room (and its whiteboard)
   });
 });
 

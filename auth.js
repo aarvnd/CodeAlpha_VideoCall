@@ -1,10 +1,10 @@
 const crypto = require('node:crypto');
 const db = require('./db');
 
-const SESSION_DAYS = 7;
-const COOKIE = 'sid';
+const sessionDays = 7;
+const cookieName = 'sid';
 
-// scrypt is a slow, memory-hard hash: brute-forcing a leaked DB is expensive
+// scrypt is slow on purpose, so cracking a leaked db takes forever
 function hashPassword(password) {
   const salt = crypto.randomBytes(16).toString('hex');
   const hash = crypto.scryptSync(password, salt, 64).toString('hex');
@@ -19,9 +19,9 @@ function verifyPassword(password, stored) {
 
 function createSession(res, userId) {
   const token = crypto.randomBytes(32).toString('hex');
-  const expires = Date.now() + SESSION_DAYS * 864e5;
-  db.prepare('INSERT INTO sessions (token, user_id, expires_at) VALUES (?, ?, ?)').run(token, userId, expires);
-  res.cookie(COOKIE, token, { httpOnly: true, sameSite: 'lax', maxAge: SESSION_DAYS * 864e5 });
+  const expires = Date.now() + sessionDays * 864e5;
+  db.prepare('insert into sessions (token, user_id, expires_at) values (?, ?, ?)').run(token, userId, expires);
+  res.cookie(cookieName, token, { httpOnly: true, sameSite: 'lax', maxAge: sessionDays * 864e5 });
 }
 
 function readCookie(req, name) {
@@ -29,12 +29,12 @@ function readCookie(req, name) {
   return pair ? decodeURIComponent(pair.slice(name.length + 1)) : null;
 }
 
-// Sets req.user if the cookie maps to a live session
+// puts the logged in user on req.user (if the cookie is valid)
 function loadUser(req, _res, next) {
-  const token = readCookie(req, COOKIE);
+  const token = readCookie(req, cookieName);
   req.user = token
-    ? db.prepare(`SELECT u.id, u.username FROM sessions s JOIN users u ON u.id = s.user_id
-                  WHERE s.token = ? AND s.expires_at > ?`).get(token, Date.now())
+    ? db.prepare(`select u.id, u.username from sessions s join users u on u.id = s.user_id
+                  where s.token = ? and s.expires_at > ?`).get(token, Date.now())
     : undefined;
   next();
 }
@@ -45,9 +45,9 @@ function requireAuth(req, res, next) {
 }
 
 function destroySession(req, res) {
-  const token = readCookie(req, COOKIE);
-  if (token) db.prepare('DELETE FROM sessions WHERE token = ?').run(token);
-  res.clearCookie(COOKIE);
+  const token = readCookie(req, cookieName);
+  if (token) db.prepare('delete from sessions where token = ?').run(token);
+  res.clearCookie(cookieName);
 }
 
 module.exports = { hashPassword, verifyPassword, createSession, loadUser, requireAuth, destroySession };

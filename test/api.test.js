@@ -48,12 +48,12 @@ test('two users join a room, exchange signals, chat and whiteboard', async () =>
   assert.equal(jb.peers[0].username, 'alice');
   assert.equal((await joined).username, 'bob');
 
-  // signaling is relayed to the named peer only
+  // signal goes only to the peer it was meant for
   const sig = once(a, 'signal');
   b.emit('signal', { to: jb.peers[0].id, data: { sdp: 'fake-offer' } });
   assert.deepEqual(await sig, { from: jb.self, data: { sdp: 'fake-offer' } });
 
-  // chat: server relays ciphertext only; sender name comes from the session, not the client
+  // server only forwards encrypted chat, and the name comes from login (mallory can't fake it)
   const msg = once(b, 'chat');
   a.emit('chat', 'plain text is dropped');
   a.emit('chat', { iv: 'aXY', ct: 'Y2lwaGVy', from: 'mallory' });
@@ -61,7 +61,7 @@ test('two users join a room, exchange signals, chat and whiteboard', async () =>
   assert.equal(m.from, 'alice');
   assert.equal(m.ct, 'Y2lwaGVy');
 
-  // whiteboard: valid strokes are relayed and stored for late joiners; bad ones dropped
+  // valid strokes get saved for people joining later, junk gets dropped
   const drawn = once(b, 'draw');
   a.emit('draw', { x0: 9, y0: 0, x1: 0, y1: 0, w: 3, c: '#ffffff' });
   a.emit('draw', { x0: 0.1, y0: 0.1, x1: 0.2, y1: 0.2, w: 3, c: '#ffffff' });
