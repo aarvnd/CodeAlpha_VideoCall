@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/style.css">
+  <title>Log in · Huddle</title>
+</head>
+<body data-page="login" class="center">
+  <main class="card auth">
+    <h1 class="brand">Huddle</h1>
+    <p class="muted">Video meetings with screen sharing, a shared whiteboard and encrypted chat.</p>
+    <div class="tabs" role="tablist">
+      <button role="tab" data-mode="login" aria-selected="true">Log in</button>
+      <button role="tab" data-mode="register" aria-selected="false">Sign up</button>
+    </div>
+    <form id="auth">
+      <label>Username <input name="username" autocomplete="username" required minlength="3" maxlength="20" pattern="[A-Za-z0-9_]+"></label>
+      <label>Password <input name="password" type="password" autocomplete="current-password" required minlength="6" maxlength="100"></label>
+      <p id="err" class="error" role="alert"></p>
+      <button type="submit" class="btn wide">Log in</button>
+    </form>
+  </main>
+  <script src="/common.js"></script>
+</body>
+</html>

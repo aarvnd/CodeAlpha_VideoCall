@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/style.css">
+  <title>Meeting · Huddle</title>
+</head>
+<body class="room-page">
+  <header class="room-bar">
+    <a href="/" class="brand">Huddle</a>
+    <span class="muted">Room <code id="code"></code></span>
+    <span class="badge" title="Video, audio and files go peer to peer over DTLS-SRTP. Chat is AES-GCM encrypted in your browser.">🔒 Encrypted</span>
+    <button id="copy" class="btn small ghost">Copy invite link</button>
+  </header>
+
+  <main class="room">
+    <section id="stage" class="stage">
+      <div id="board-wrap" class="board-wrap" hidden>
+        <div class="board-tools">
+          <label>Color <input id="pen-color" type="color" value="#1f2937"></label>
+          <label>Size <input id="pen-size" type="range" min="1" max="20" value="4"></label>
+          <button id="eraser" class="btn small ghost" aria-pressed="false">Eraser</button>
+          <button id="clear" class="btn small ghost">Clear for all</button>
+        </div>
+        <canvas id="board" width="1600" height="900" aria-label="Shared whiteboard"></canvas>
+      </div>
+      <div id="grid" class="grid"></div>
+    </section>
+
+    <aside class="panel">
+      <h2>Chat &amp; files</h2>
+      <ul id="log" class="log" aria-live="polite"></ul>
+      <form id="chat" class="chat-form">
+        <label class="btn small ghost file-btn" title="Send a file peer to peer">📎<input id="file" type="file" multiple class="sr-only"></label>
+        <input id="chat-input" maxlength="1000" placeholder="Message (end-to-end encrypted)" aria-label="Chat message" autocomplete="off">
+        <button class="btn small">Send</button>
+      </form>
+    </aside>
+  </main>
+
+  <footer class="controls">
+    <button id="mic" class="ctl" aria-pressed="false">🎙️ <span>Mic</span></button>
+    <button id="cam" class="ctl" aria-pressed="false">📷 <span>Camera</span></button>
+    <button id="screen" class="ctl" aria-pressed="false">🖥️ <span>Share screen</span></button>
+    <button id="board-btn" class="ctl" aria-pressed="false">✏️ <span>Whiteboard</span></button>
+    <button id="leave" class="ctl leave">Leave</button>
+  </footer>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/common.js"></script>
+  <script src="/whiteboard.js"></script>
+  <script src="/room.js"></script>
+</body>
+</html>

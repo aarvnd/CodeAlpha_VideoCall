@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/style.css">
+  <title>Huddle</title>
+</head>
+<body data-page="lobby" class="center">
+  <main class="card auth">
+    <div class="row-between"><h1 class="brand">Huddle</h1><button id="logout" class="btn small ghost">Log out</button></div>
+    <p id="hello" class="muted"></p>
+    <button id="new" class="btn wide">Start a new meeting</button>
+    <div class="or muted">or</div>
+    <form id="join">
+      <label>Invite link <input name="link" placeholder="Paste the invite link" required></label>
+      <button class="btn wide ghost">Join</button>
+    </form>
+  </main>
+  <script src="/common.js"></script>
+</body>
+</html>
