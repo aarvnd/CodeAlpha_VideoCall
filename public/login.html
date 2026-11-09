@@ -3,23 +3,31 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="/style.css">
+  <meta name="description" content="Huddle: small video meetings with screen sharing, a shared whiteboard, peer-to-peer files and encrypted chat.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Mona+Sans:wdth,wght@100,400;100,500;125,300&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
   <title>Log in · Huddle</title>
 </head>
 <body data-page="login" class="center">
-  <main class="card auth">
-    <h1 class="brand">Huddle</h1>
-    <p class="muted">Video meetings with screen sharing, a shared whiteboard and encrypted chat.</p>
-    <div class="tabs" role="tablist">
-      <button role="tab" data-mode="login" aria-selected="true">Log in</button>
-      <button role="tab" data-mode="register" aria-selected="false">Sign up</button>
+  <main class="door">
+    <div>
+      <h1 class="mark">Huddle</h1>
+      <p class="lead">Video meetings with screen sharing, a shared whiteboard and encrypted chat.</p>
     </div>
-    <form id="auth">
-      <label>Username <input name="username" autocomplete="username" required minlength="3" maxlength="20" pattern="[A-Za-z0-9_]+"></label>
-      <label>Password <input name="password" type="password" autocomplete="current-password" required minlength="6" maxlength="100"></label>
-      <p id="err" class="error" role="alert"></p>
-      <button type="submit" class="btn wide">Log in</button>
-    </form>
+    <section class="well" aria-label="Log in or sign up">
+      <div class="tabs" role="tablist" aria-label="Account">
+        <button type="button" role="tab" data-mode="login" aria-selected="true">Log in</button>
+        <button type="button" role="tab" data-mode="register" aria-selected="false">Sign up</button>
+      </div>
+      <form id="auth">
+        <label>Username <input name="username" autocomplete="username" required minlength="3" maxlength="20" pattern="[A-Za-z0-9_]+"></label>
+        <label>Password <input name="password" type="password" autocomplete="current-password" required minlength="6" maxlength="100"></label>
+        <p id="err" class="error" role="alert"></p>
+        <button type="submit" class="btn btn--primary btn--wide">Log in</button>
+      </form>
+    </section>
   </main>
   <script src="/common.js"></script>
 </body>

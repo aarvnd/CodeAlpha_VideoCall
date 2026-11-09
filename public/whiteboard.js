@@ -3,7 +3,8 @@
 function initBoard(canvas, socket, history) {
   const ctx = canvas.getContext('2d');
   const width = canvas.width, height = canvas.height;
-  const bg = '#fbfbfd';
+  // board colour comes from the --color-board token (hex, because erasing sends it through the server's #hex check)
+  const bg = getComputedStyle(document.documentElement).getPropertyValue('--color-board').trim() || '#071129';
   const color = document.getElementById('pen-color');
   const size = document.getElementById('pen-size');
   let erasing = false, last = null;

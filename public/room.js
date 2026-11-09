@@ -38,7 +38,9 @@ function addTile(id, name, local) {
 let localTile;
 function showLocal() {
   const track = screenTrack || camTrack;
-  localTile.video.srcObject = track ? new MediaStream([track]) : null;
+  // only swap the stream when the track changes, otherwise muting makes the preview blink
+  const current = localTile.video.srcObject?.getVideoTracks()[0] || null;
+  if (current !== track) localTile.video.srcObject = track ? new MediaStream([track]) : null;
   localTile.el.classList.toggle('mirror', !screenTrack);
   localTile.el.classList.toggle('off', !track || !track.enabled);
 }
@@ -202,7 +204,7 @@ function chatLine(from, text) {
 const sysLine = text => { const li = chatLine('', text); li.className = 'sys'; return li; };
 const fileLine = (from, name, blob) => {
   const li = h('li', { class: 'sys file' }, `${from} shared `,
-    h('a', { href: URL.createObjectURL(blob), download: name }, `📎 ${name}`), ` (${(blob.size / 1024).toFixed(0)} KB)`);
+    h('a', { href: URL.createObjectURL(blob), download: name }, name), ` (${(blob.size / 1024).toFixed(0)}\u00a0KB)`);
   return li;
 };
 

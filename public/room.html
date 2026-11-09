@@ -3,48 +3,52 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="/style.css">
+  <meta name="description" content="Huddle: small video meetings with screen sharing, a shared whiteboard, peer-to-peer files and encrypted chat.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Mona+Sans:wdth,wght@100,400;100,500;125,300&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
   <title>Meeting · Huddle</title>
 </head>
 <body class="room-page">
   <header class="room-bar">
-    <a href="/" class="brand">Huddle</a>
-    <span class="muted">Room <code id="code"></code></span>
-    <span class="badge" title="Video, audio and files go peer to peer over DTLS-SRTP. Chat is AES-GCM encrypted in your browser.">🔒 Encrypted</span>
-    <button id="copy" class="btn small ghost">Copy invite link</button>
+    <a href="/" class="wordmark" aria-label="Huddle home">Huddle</a>
+    <span class="meta">Room <code id="code"></code></span>
+    <span class="badge" title="Video, audio and files go peer to peer over DTLS-SRTP. Chat is AES-GCM encrypted in your browser."><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 11h12v9H6zM8.5 11V8a3.5 3.5 0 0 1 7 0v3"/></svg> Encrypted</span>
+    <button id="copy" type="button" class="btn btn--small"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg> Copy invite link</button>
   </header>
 
   <main class="room">
-    <section id="stage" class="stage">
+    <section id="stage" class="stage" aria-label="Call">
       <div id="board-wrap" class="board-wrap" hidden>
         <div class="board-tools">
-          <label>Color <input id="pen-color" type="color" value="#1f2937"></label>
+          <label>Colour <input id="pen-color" type="color" value="#e7f0f9"></label>
           <label>Size <input id="pen-size" type="range" min="1" max="20" value="4"></label>
-          <button id="eraser" class="btn small ghost" aria-pressed="false">Eraser</button>
-          <button id="clear" class="btn small ghost">Clear for all</button>
+          <button id="eraser" type="button" class="btn btn--small" aria-pressed="false">Eraser</button>
+          <button id="clear" type="button" class="btn btn--small">Clear for all</button>
         </div>
         <canvas id="board" width="1600" height="900" aria-label="Shared whiteboard"></canvas>
       </div>
       <div id="grid" class="grid"></div>
     </section>
 
-    <aside class="panel">
-      <h2>Chat &amp; files</h2>
+    <aside class="panel" aria-labelledby="panel-head">
+      <h2 id="panel-head">Chat &amp; files</h2>
       <ul id="log" class="log" aria-live="polite"></ul>
       <form id="chat" class="chat-form">
-        <label class="btn small ghost file-btn" title="Send a file peer to peer">📎<input id="file" type="file" multiple class="sr-only"></label>
-        <input id="chat-input" maxlength="1000" placeholder="Message (end-to-end encrypted)" aria-label="Chat message" autocomplete="off">
-        <button class="btn small">Send</button>
+        <label class="btn btn--small file-btn" title="Send a file peer to peer"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16.5 8.5 9.8 15.2a2 2 0 0 1-2.8-2.8l7.1-7.1a3.5 3.5 0 0 1 5 5l-7.4 7.4a5 5 0 0 1-7.1-7.1L11 4.2"/></svg><span class="visually-hidden">Send a file</span><input id="file" type="file" multiple class="visually-hidden"></label>
+        <input id="chat-input" maxlength="1000" placeholder="Encrypted message" aria-label="Chat message" autocomplete="off">
+        <button class="btn btn--small btn--primary">Send</button>
       </form>
     </aside>
   </main>
 
-  <footer class="controls">
-    <button id="mic" class="ctl" aria-pressed="false">🎙️ <span>Mic</span></button>
-    <button id="cam" class="ctl" aria-pressed="false">📷 <span>Camera</span></button>
-    <button id="screen" class="ctl" aria-pressed="false">🖥️ <span>Share screen</span></button>
-    <button id="board-btn" class="ctl" aria-pressed="false">✏️ <span>Whiteboard</span></button>
-    <button id="leave" class="ctl leave">Leave</button>
+  <footer class="controls" aria-label="Call controls">
+    <button id="mic" type="button" class="ctl" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4h6v9H9zM5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7"/></svg> <span>Mute</span></button>
+    <button id="cam" type="button" class="ctl" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h12v10H3zM15 10.5l6-3.5v10l-6-3.5"/></svg> <span>Camera off</span></button>
+    <button id="screen" type="button" class="ctl" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h18v12H3zM8 20h8M12 16v4"/></svg> <span>Share screen</span></button>
+    <button id="board-btn" type="button" class="ctl" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l1-4L16 5l3 3L8 19zM14 7l3 3"/></svg> <span>Whiteboard</span></button>
+    <button id="leave" type="button" class="ctl leave">Leave</button>
   </footer>
 
   <script src="/socket.io/socket.io.js"></script>

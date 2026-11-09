@@ -3,19 +3,28 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="/style.css">
+  <meta name="description" content="Huddle: small video meetings with screen sharing, a shared whiteboard, peer-to-peer files and encrypted chat.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Mona+Sans:wdth,wght@100,400;100,500;125,300&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
   <title>Huddle</title>
 </head>
 <body data-page="lobby" class="center">
-  <main class="card auth">
-    <div class="row-between"><h1 class="brand">Huddle</h1><button id="logout" class="btn small ghost">Log out</button></div>
-    <p id="hello" class="muted"></p>
-    <button id="new" class="btn wide">Start a new meeting</button>
-    <div class="or muted">or</div>
-    <form id="join">
-      <label>Invite link <input name="link" placeholder="Paste the invite link" required></label>
-      <button class="btn wide ghost">Join</button>
-    </form>
+  <main class="door">
+    <div>
+      <h1 class="mark">Huddle</h1>
+      <p id="hello" class="lead"></p>
+    </div>
+    <section class="well" aria-label="Start or join a meeting">
+      <div class="row-between"><span class="muted">New call</span><button id="logout" type="button" class="btn btn--small">Log out</button></div>
+      <button id="new" type="button" class="btn btn--primary btn--wide">Start a new meeting</button>
+      <div class="or">or</div>
+      <form id="join">
+        <label>Invite link <input name="link" placeholder="Paste the invite link" required></label>
+        <button class="btn btn--wide">Join</button>
+      </form>
+    </section>
   </main>
   <script src="/common.js"></script>
 </body>
